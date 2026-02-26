@@ -21,9 +21,47 @@
   <body>
 
 <audio id="bg-music" loop preload="auto">
-  <source src="./music/music.mp3" type="audio/mpeg">
+  <source src="./music/music.mp3" type="audio/mpeg" />
 </audio>
-    <!-- Page-level CRT scanlines + vignette -->
+
+<script>
+  const bg = document.getElementById("bg-music");
+
+  // optional: volume
+  bg.volume = 0.25;
+
+  async function tryPlay() {
+    try {
+      await bg.play();
+    } catch (e) {
+      // Autoplay blocked: wait for first user interaction
+    }
+  }
+
+  // 1) Try autoplay on load
+  window.addEventListener("load", tryPlay);
+
+  // 2) If blocked, start on first interaction (once)
+  const startOnFirstTouch = () => {
+    tryPlay();
+    window.removeEventListener("pointerdown", startOnFirstTouch);
+    window.removeEventListener("keydown", startOnFirstTouch);
+  };
+  window.addEventListener("pointerdown", startOnFirstTouch);
+  window.addEventListener("keydown", startOnFirstTouch);
+
+  // 3) Pause when tab is hidden / user switches apps
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) bg.pause();
+    else tryPlay(); // resume when back (if allowed)
+  });
+
+  // 4) Extra safety: pause on page exit
+  window.addEventListener("pagehide", () => bg.pause());
+  window.addEventListener("beforeunload", () => bg.pause());
+</script>
+
+
     <div id="crt-wrapper">
 
       <!-- macOS-style terminal window -->
