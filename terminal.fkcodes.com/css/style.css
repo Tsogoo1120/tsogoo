@@ -1,0 +1,499 @@
+/* ==========================================================================
+   FK Codes Terminal — macOS Window Style
+   ========================================================================== */
+
+/* --- Custom Properties --- */
+:root {
+  /* Desktop (page background) */
+  --desktop-bg: #0d0e1a;
+
+  
+
+  /* Window */
+  --win-bg:       #1a1b2e;
+  --win-titlebar: #141521;
+  --win-border:   #2a2b45;
+  --win-shadow:   0 32px 80px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5);
+
+  /* Traffic lights */
+  --dot-close: #ff5f57;
+  --dot-min:   #ffbd2e;
+  --dot-max:   #28c840;
+  --dot-size:  13px;
+
+  /* Terminal text */
+  --green:      #6ec9a8;
+  --green-dim:  #4a9e80;
+  --green-glow: rgba(110,201,168,0.35);
+  --cyan:       #89c4c6;
+  --cyan-glow:  rgba(137,196,198,0.3);
+  --warm:       #c9a07a;
+  --muted:      #a88f9e;
+  --text:       #d4d4cc;
+  --error:      #cf8a6e;
+
+  --font: 'Courier New', 'Lucida Console', Consolas, monospace;
+  --font-size: clamp(12px, 1.4vw, 14px);
+}
+
+/* --- Base Reset --- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Desktop wallpaper — subtle dot-grid pattern */
+  background-color: var(--desktop-bg);
+  background-image:
+    radial-gradient(circle, rgba(110,201,168,0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  font-family: var(--font);
+  font-size: var(--font-size);
+  color: var(--green);
+  overflow: hidden;            /* page never scrolls — window does */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Selection --- */
+::selection      { color: var(--desktop-bg); background: var(--green); }
+::-moz-selection { color: var(--desktop-bg); background: var(--green); }
+
+/* --- Hidden offscreen textarea --- */
+textarea { position: absolute; left: -9999px; }
+b { font-weight: bold; text-decoration: underline; }
+
+/* ==========================================================================
+   CRT Overlay — scanlines + vignette on the whole page
+   ========================================================================== */
+#crt-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 3vw, 32px);
+}
+
+/* Scanlines */
+#crt-wrapper::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px, transparent 2px,
+    rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Vignette */
+#crt-wrapper::after {
+  content: '';
+  position: fixed;
+  inset: -2%;
+  width: 104%; height: 104%;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Subtle flicker on the whole page */
+@keyframes crt-flicker {
+  0%,100% { opacity:1 }
+  4%      { opacity:.98 }
+  8%      { opacity:1 }
+  50%     { opacity:.99 }
+  52%     { opacity:1 }
+}
+#crt-wrapper { animation: crt-flicker 6s ease-in-out infinite; }
+
+/* ==========================================================================
+   Terminal Window
+   ========================================================================== */
+.terminal-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  /* Size — fills most of the screen */
+  width:  min(960px, calc(100vw - 16px));
+  height: min(680px, calc(100vh - 16px));
+
+  background: var(--win-bg);
+  border: 1px solid var(--win-border);
+  border-radius: 10px;
+  box-shadow: var(--win-shadow);
+
+  /* Entrance animation */
+  opacity: 0;
+  transform: scale(0.96) translateY(12px);
+  animation: window-appear 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s forwards;
+
+  overflow: hidden;   /* clip children to rounded corners */
+  z-index: 10;
+}
+
+@keyframes window-appear {
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ==========================================================================
+   Title Bar
+   ========================================================================== */
+.terminal-titlebar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  background: var(--win-titlebar);
+  border-bottom: 1px solid var(--win-border);
+  border-radius: 10px 10px 0 0;
+  user-select: none;
+  position: relative;        /* for absolute title centering */
+}
+
+/* Traffic lights */
+.titlebar-dots {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.dot {
+  width:  var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 50%;
+  display: block;
+  position: relative;
+  transition: filter 0.15s;
+}
+.dot--close { background: var(--dot-close); }
+.dot--min   { background: var(--dot-min);   }
+.dot--max   { background: var(--dot-max);   }
+
+/* Show symbols on titlebar hover */
+.terminal-titlebar:hover .dot--close::after,
+.terminal-titlebar:hover .dot--min::after,
+.terminal-titlebar:hover .dot--max::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.6;
+}
+.terminal-titlebar:hover .dot--close::after { content: '×'; font-size:9px; color:#3e0000; inset:0; display:flex; align-items:center; justify-content:center; }
+.terminal-titlebar:hover .dot--min::after   { content: '–'; font-size:9px; color:#3e2e00; inset:0; display:flex; align-items:center; justify-content:center; }
+.terminal-titlebar:hover .dot--max::after   { content: '+'; font-size:9px; color:#003e0a; inset:0; display:flex; align-items:center; justify-content:center; }
+
+/* Window title — absolutely centered so dots don't push it */
+.titlebar-title {
+  position: absolute;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(214, 214, 204, 0.5);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+/* Music toggle button */
+.music-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--green-dim);
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding: 0;
+}
+
+.music-toggle:hover {
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+.music-toggle:active {
+  transform: scale(0.95);
+}
+
+.music-toggle.playing {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+
+/* Pixel knight — right side of titlebar, toggles sound */
+.pixel-mascot {
+  margin-left: 8px;
+  flex-shrink: 0;
+  opacity: 0.55;
+  cursor: pointer;
+  z-index: 1;
+  transition: opacity 0.2s, transform 0.2s;
+  line-height: 0;
+}
+.pixel-mascot:hover { opacity: 1; transform: translateY(-2px); }
+.pixel-mascot.sound-on { opacity: 1; }
+
+/* ==========================================================================
+   Terminal Body — scrollable content area
+   ========================================================================== */
+.terminal-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 18px 8px;
+  cursor: text;
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--green-dim) transparent;
+}
+.terminal-body::-webkit-scrollbar       { width: 5px; }
+.terminal-body::-webkit-scrollbar-track { background: transparent; }
+.terminal-body::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 3px; }
+.terminal-body::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+/* ==========================================================================
+   Terminal Output
+   ========================================================================== */
+#terminal {
+  opacity: 0;
+  animation: fade-up 0.7s ease 0.55s forwards;
+}
+
+@keyframes fade-up {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+p {
+  display: block;
+  line-height: 1.4em;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  animation: typing 0.5s steps(30, end);
+}
+
+.no-animation { animation: typing 0s steps(30, end); }
+
+.margin { margin-left: clamp(10px, 2vw, 20px); }
+
+@keyframes typing {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+/* ==========================================================================
+   Command Input Area
+   ========================================================================== */
+#command {
+  cursor: text;
+  color: var(--cyan);
+  padding-top: 2px;
+  min-height: 44px;
+}
+
+#liner {
+  line-height: 1.4em;
+  opacity: 0;
+  animation: fade-up 0.4s ease 1.2s forwards;
+}
+
+#liner::before {
+  color: var(--green);
+  content: "visitor:~$\00a0";
+  text-shadow: 0 0 8px var(--green-glow);
+}
+#liner.password::before { content: "Password:\00a0"; }
+
+@keyframes show { from{opacity:0} to{opacity:1} }
+
+/* ==========================================================================
+   Cursor
+   ========================================================================== */
+.cursor {
+  font-size: 12px;
+  color: var(--cyan);
+  background-color: var(--cyan);
+  position: relative;
+  height: 1.3em;
+  width: 10px;
+  max-width: 10px;
+  transform: translateY(3px);
+  overflow: hidden;
+  text-indent: -5px;
+  display: inline-block;
+  box-shadow: 0 0 6px var(--cyan-glow);
+  animation: cursor-blink 0.9s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%,100% { opacity:1 }
+  50%     { opacity:0 }
+}
+
+/* ==========================================================================
+   Color Classes
+   ========================================================================== */
+.index   { color: var(--text); }
+.color2  { color: var(--warm); }
+.command { color: var(--cyan); text-shadow: 0 0 6px var(--cyan-glow); }
+.error   { color: var(--error); }
+.white   { color: #eee; }
+.inherit, a { color: var(--muted); }
+
+a {
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+a:hover {
+  background: var(--cyan);
+  color: var(--desktop-bg);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+a:focus { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* ==========================================================================
+   Responsive — window scales down on small screens
+   ========================================================================== */
+
+/* Tablet */
+@media (max-width: 700px) {
+  .terminal-window {
+    width:  100vw;
+    height: 100dvh;          /* full-screen on mobile */
+    border-radius: 0;
+    border: none;
+  }
+
+  .terminal-titlebar { border-radius: 0; }
+
+  p {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .margin { margin-left: 10px; }
+
+  /* Lighter scanlines on mobile */
+  #crt-wrapper::before {
+    background: repeating-linear-gradient(
+      0deg, transparent 0px, transparent 3px,
+      rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 6px
+    );
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  :root { --font-size: 11px; }
+  .terminal-body { padding: 10px 12px 6px; }
+  .titlebar-title { font-size: 10px; }
+}
+
+/* ==========================================================================
+   Profile Image — Hero style with glow & carousel animation
+   ========================================================================== */
+.profile-img {
+  display: block;
+  margin: 0 auto 12px;
+  width: clamp(100px, 18vw, 160px);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+
+  /* Border: multi-layered for depth */
+  border: 2px solid var(--green);
+  border-radius: 8px;
+  box-shadow:
+    0 0 12px var(--green-glow),
+    inset 0 0 8px rgba(110, 201, 168, 0.15),
+    0 0 24px rgba(137, 196, 198, 0.1);
+
+  /* Entrance animation */
+  opacity: 0;
+  transform: translateY(12px) scale(0.92);
+  animation: profile-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
+  /* Smooth transitions for hover */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes profile-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Hover state: glow intensifies, subtle scale */
+.profile-img:hover {
+  border-color: var(--cyan);
+  box-shadow:
+    0 0 20px var(--cyan-glow),
+    0 0 40px rgba(57, 255, 20, 0.2),
+    inset 0 0 12px rgba(137, 196, 198, 0.2),
+    0 8px 32px rgba(110, 201, 168, 0.25);
+  transform: scale(1.05) translateY(-2px);
+}
+
+/* Active state: press effect */
+.profile-img:active {
+  transform: scale(0.98) translateY(0);
+  box-shadow:
+    0 0 12px var(--cyan-glow),
+    inset 0 0 12px rgba(137, 196, 198, 0.3),
+    0 2px 12px rgba(110, 201, 168, 0.15);
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  #crt-wrapper::before, #crt-wrapper::after { display: none; }
+  .terminal-window { opacity:1; transform:none; }
+  #terminal        { opacity:1; transform:none; }
+  #liner           { opacity:1; }
+  .profile-img { opacity:1; transform:none; }
+}

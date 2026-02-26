@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QJ9TR5T9S2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-QJ9TR5T9S2');
+    </script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Forrest Knight — Software Engineer & Creator. Interactive terminal portfolio." />
+    <meta name="theme-color" content="#0d0e1a" />
+    <title>FK Codes | Terminal</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/style.css" />
+    <link rel="icon" type="image/x-icon" href="/terminal.fkcodes.com/css/img.png" />
+  </head>
+  <body>
+
+    <!-- Background music audio element -->
+    <audio id="bg-music" loop preload="auto">
+      <source src="/terminal.fkcodes.com/music/music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Page-level CRT scanlines + vignette -->
+    <div id="crt-wrapper">
+
+      <!-- macOS-style terminal window -->
+      <div class="terminal-window">
+
+        <!-- Title bar -->
+        <div class="terminal-titlebar">
+          <div class="titlebar-dots" aria-hidden="true">
+            <span class="dot dot--close"  title="Close"></span>
+            <span class="dot dot--min"    title="Minimize"></span>
+            <span class="dot dot--max"    title="Maximize"></span>
+          </div>
+          <div class="titlebar-title">tsogoo_1120 — bash</div>
+          <!-- Music toggle button -->
+          <button id="music-toggle" class="music-toggle" title="Toggle background music" aria-label="Toggle background music">♫</button>
+          <!-- Pixel knight mascot — click to toggle key sounds -->
+          <div class="pixel-mascot" title="Toggle sound effects">
+            <svg viewBox="0 0 16 16" width="22" height="22" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block">
+              <rect x="5" y="0" width="6" height="1" fill="#89c4c6"/>
+              <rect x="4" y="1" width="8" height="1" fill="#89c4c6"/>
+              <rect x="4" y="2" width="8" height="1" fill="#6ec9a8"/>
+              <rect x="4" y="3" width="2" height="1" fill="#6ec9a8"/>
+              <rect x="6" y="3" width="4" height="1" fill="#0d0e1a"/>
+              <rect x="10" y="3" width="2" height="1" fill="#6ec9a8"/>
+              <rect x="4" y="4" width="8" height="1" fill="#6ec9a8"/>
+              <rect x="5" y="5" width="6" height="1" fill="#c9a07a"/>
+              <rect x="4" y="6" width="8" height="2" fill="#c9a07a"/>
+              <rect x="2" y="6" width="2" height="1" fill="#a88f9e"/>
+              <rect x="12" y="6" width="2" height="1" fill="#a88f9e"/>
+              <rect x="1" y="4" width="1" height="3" fill="#89c4c6"/>
+              <rect x="1" y="2" width="1" height="2" fill="#d4d4cc"/>
+              <rect x="5" y="8" width="2" height="2" fill="#4a9e80"/>
+              <rect x="9" y="8" width="2" height="2" fill="#4a9e80"/>
+              <rect x="4" y="10" width="3" height="1" fill="#1e1f35"/>
+              <rect x="9" y="10" width="3" height="1" fill="#1e1f35"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Scrollable terminal body -->
+        <div class="terminal-body" id="terminal-body" onclick="document.getElementById('texter').focus();">
+
+          <!-- Terminal output -->
+          <div id="terminal">
+            <a id="before"></a>
+          </div>
+
+          <!-- Command input -->
+          <div id="command">
+            <textarea
+              type="text"
+              id="texter"
+              onkeyup="typeIt(this, event)"
+              onkeydown="typeIt(this, event);
+                         moveIt(this.value.length, event)"
+              onkeypress="typeIt(this, event);"
+              autofocus
+              aria-label="Terminal command input"
+            ></textarea>
+            <div id="liner">
+              <span id="typer"></span><b class="cursor" id="cursor">█</b>
+            </div>
+          </div>
+
+        </div><!-- /terminal-body -->
+      </div><!-- /terminal-window -->
+
+    </div><!-- /crt-wrapper -->
+
+    <!-- Scripts — original order preserved, effects.js added last -->
+    <script src="js/caret.js"></script>
+    <script src="js/commands.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/effects.js"></script>
+
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"ce33deabfc244faf8701bf44eed7cccb","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+  </body>
+</html>
